@@ -1,15 +1,34 @@
-export async function syncToServer(key: string, data: any) {
-  try {
-    await fetch(`/api/penyimpanan/${key}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(data)
-    });
-  } catch (error) {
-    console.error(`Failed to sync ${key} to server:`, error);
+let syncQueue: Promise<void> = Promise.resolve();
+export let syncTotal = 0;
+export let syncCompleted = 0;
+export let onSyncProgress: ((completed: number, total: number) => void) | null = null;
+
+export function setSyncProgressListener(callback: ((c: number, t: number) => void) | null) {
+  onSyncProgress = callback;
+  if (!callback) {
+    syncTotal = 0;
+    syncCompleted = 0;
   }
+}
+
+export async function syncToServer(key: string, data: any) {
+  syncTotal++;
+  syncQueue = syncQueue.then(async () => {
+    try {
+      await fetch(`/api/penyimpanan/${key}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      });
+    } catch (error) {
+      console.error(`Failed to sync ${key} to server:`, error);
+    }
+    syncCompleted++;
+    if (onSyncProgress) onSyncProgress(syncCompleted, syncTotal);
+  });
+  return syncQueue;
 }
 
 export async function loginDirectToServer(username: string, password: string): Promise<{ success: boolean; user?: any; error?: string }> {
@@ -64,4 +83,8 @@ export async function wipeServer() {
   } catch (error) {
     console.error('Failed to wipe server:', error);
   }
+}
+
+export function awaitSyncQueue() {
+  return syncQueue;
 }

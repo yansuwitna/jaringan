@@ -19,6 +19,7 @@ import {
 import { loginUser } from '../utils/autentikasi';
 import { User, UserAccount } from '../types/auth';
 import { parseImportJson } from '../utils/eksporImpor';
+import { ModalRestore } from './ModalRestore';
 
 interface LoginProps {
   users?: UserAccount[];
@@ -46,6 +47,8 @@ export const Login: React.FC<LoginProps> = ({
   hasNoUsers: propHasNoUsers 
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [pendingRestoreData, setPendingRestoreData] = useState<any>(null);
+  const [isRestoreModalOpen, setIsRestoreModalOpen] = useState(false);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -377,11 +380,8 @@ export const Login: React.FC<LoginProps> = ({
                           try {
                             const content = event.target?.result as string;
                             const parsed = parseImportJson(content);
-                            onImportData(parsed);
-                            setRegSuccess('Data berhasil dipulihkan dari berkas cadangan! Silakan masuk dengan akun yang ada pada cadangan.');
-                            if (parsed.users && parsed.users.length > 0) {
-                              setHasNoUsers(false);
-                            }
+                            setPendingRestoreData(parsed);
+                            setIsRestoreModalOpen(true);
                           } catch (err: any) {
                             setRegError(err?.message || 'Berkas cadangan JSON tidak valid atau rusak!');
                           }
@@ -511,6 +511,23 @@ export const Login: React.FC<LoginProps> = ({
 
       </div>
 
+      <ModalRestore 
+        isOpen={isRestoreModalOpen} 
+        pendingRestoreData={pendingRestoreData} 
+        onClose={() => {
+          setIsRestoreModalOpen(false);
+          setPendingRestoreData(null);
+        }} 
+        onConfirm={(dataToRestore) => {
+          onImportData?.(dataToRestore);
+          setIsRestoreModalOpen(false);
+          setPendingRestoreData(null);
+          setRegSuccess('Data berhasil dipulihkan dari berkas cadangan! Silakan masuk dengan akun yang ada pada cadangan.');
+          if (dataToRestore.users && dataToRestore.users.length > 0) {
+            setHasNoUsers(false);
+          }
+        }} 
+      />
     </div>
   );
 };

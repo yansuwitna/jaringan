@@ -40,6 +40,8 @@ import {
 import { UserAccount } from '../types/auth';
 import { generateDemoData } from '../utils/dataContoh';
 import { exportBackupJson, parseImportJson, exportAllToSingleXlsx } from '../utils/eksporImpor';
+import { awaitSyncQueue, setSyncProgressListener } from '../utils/api';
+import Swal from 'sweetalert2';
 import { showConfirm, showSuccess, showError, showWarning } from '../utils/swal';
 import { ModalPortal } from './ModalPortal';
 
@@ -351,10 +353,37 @@ export const BackupView: React.FC<BackupViewProps> = ({
     onImportData(dataToRestore);
     setIsRestoreModalOpen(false);
     setPendingRestoreData(null);
-    showSuccess(
-      'Pemulihan Sukses',
-      'Seluruh data pilihan Anda berhasil dipulihkan ke sistem dan database.'
-    );
+    
+    setSyncProgressListener((completed, total) => {
+      const percentage = Math.round((completed / total) * 100);
+      Swal.update({
+        html: `Menyimpan tabel ke server (${completed}/${total})...<br/><br/>
+               <div style="width: 100%; background: #e2e8f0; border-radius: 8px; overflow: hidden; height: 12px;">
+                 <div style="width: ${percentage}%; background: #4f46e5; height: 100%; transition: width 0.3s ease;"></div>
+               </div>
+               <div style="text-align: center; margin-top: 5px; font-size: 12px;">${percentage}% Selesai</div>`
+      });
+    });
+
+    Swal.fire({
+      title: 'Memulihkan Data...',
+      html: 'Menyiapkan sinkronisasi data...',
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    awaitSyncQueue().then(() => {
+      setSyncProgressListener(null);
+      Swal.fire(
+        'Pemulihan Sukses',
+        'Seluruh data pilihan Anda berhasil dipulihkan ke sistem dan database.',
+        'success'
+      ).then(() => {
+        window.location.reload();
+      });
+    });
   };
 
   const handleWipeAll = async () => {

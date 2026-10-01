@@ -4,10 +4,19 @@ import { syncToServer, loginDirectToServer, wipeServer } from './api';
 const USERS_STORAGE_KEY = 'netipam_users_list_v1';
 
 async function hashPassword(password: string): Promise<string> {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hash = await crypto.subtle.digest('SHA-256', data);
-  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+  if (typeof crypto !== 'undefined' && crypto.subtle) {
+    try {
+      const encoder = new TextEncoder();
+      const data = encoder.encode(password);
+      const hash = await crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) {
+      console.warn('Web Crypto API failed, fallback to raw password (backend akan melakukan hashing).');
+    }
+  } else {
+    console.warn('Web Crypto API tidak tersedia, fallback to raw password (backend akan melakukan hashing).');
+  }
+  return password;
 }
 
 export async function createUser(

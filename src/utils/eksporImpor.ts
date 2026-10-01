@@ -616,6 +616,8 @@ export function parseImportJson(fileContent: string): {
   cctvCables?: CctvCableRun[];
   waterDevices?: WaterDevice[];
   waterPipes?: WaterPipeRun[];
+  soundDevices?: SoundDevice[];
+  soundCables?: SoundCableRun[];
   lanLocations?: LanLocation[];
   lanZones?: LanZone[];
   lanDevices?: LanDevice[];
@@ -666,6 +668,8 @@ export function parseImportJson(fileContent: string): {
     waterDeviceTypes: Array.isArray(parsed.waterDeviceTypes) ? parsed.waterDeviceTypes : undefined,
     soundDeviceTypes: Array.isArray(parsed.soundDeviceTypes) ? parsed.soundDeviceTypes : undefined,
     waterPipeTypes: Array.isArray(parsed.waterPipeTypes) ? parsed.waterPipeTypes : undefined,
-    soundCableTypes: Array.isArray(parsed.soundCableTypes) ? parsed.soundCableTypes : undefined
+    soundCableTypes: Array.isArray(parsed.soundCableTypes) ? parsed.soundCableTypes : undefined,
+    soundDevices: Array.isArray(parsed.soundDevices) ? parsed.soundDevices : undefined,
+    soundCables: Array.isArray(parsed.soundCables) ? parsed.soundCables : undefined
   };
 }

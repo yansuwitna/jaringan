@@ -162,6 +162,7 @@ export const BackupView: React.FC<BackupViewProps> = ({
   const [restoreElectricity, setRestoreElectricity] = useState(true);
   const [restoreCctv, setRestoreCctv] = useState(true);
   const [restoreWater, setRestoreWater] = useState(true);
+  const [restoreSound, setRestoreSound] = useState(true);
   const [restoreDns, setRestoreDns] = useState(true);
   const [restoreSub, setRestoreSub] = useState(true);
   const [restoreServices, setRestoreServices] = useState(true);
@@ -174,6 +175,7 @@ export const BackupView: React.FC<BackupViewProps> = ({
     setRestoreElectricity(select);
     setRestoreCctv(select);
     setRestoreWater(select);
+    setRestoreSound(select);
     setRestoreDns(select);
     setRestoreSub(select);
     setRestoreServices(select);
@@ -271,6 +273,7 @@ export const BackupView: React.FC<BackupViewProps> = ({
         setRestoreElectricity(true);
         setRestoreCctv(true);
         setRestoreWater(true);
+        setRestoreSound(true);
         setRestoreDns(true);
         setRestoreSub(true);
         setRestoreServices(true);
@@ -290,7 +293,7 @@ export const BackupView: React.FC<BackupViewProps> = ({
     if (!pendingRestoreData) return;
 
     const anySelected = restoreLan || restoreIpam || restoreElectricity || restoreCctv || 
-      restoreWater || restoreDns || restoreSub || restoreServices || restoreCategories || restoreUsers;
+      restoreWater || restoreSound || restoreDns || restoreSub || restoreServices || restoreCategories || restoreUsers;
     
     if (!anySelected) {
       showWarning('Belum Ada Pilihan', 'Pilih minimal satu kategori data untuk dipulihkan.');
@@ -328,6 +331,12 @@ export const BackupView: React.FC<BackupViewProps> = ({
       dataToRestore.waterDeviceTypes = pendingRestoreData.waterDeviceTypes;
       dataToRestore.waterPipes = pendingRestoreData.waterPipes;
       dataToRestore.waterPipeTypes = pendingRestoreData.waterPipeTypes;
+    }
+    if (restoreSound) {
+      dataToRestore.soundDevices = pendingRestoreData.soundDevices;
+      dataToRestore.soundDeviceTypes = pendingRestoreData.soundDeviceTypes;
+      dataToRestore.soundCables = pendingRestoreData.soundCables;
+      dataToRestore.soundCableTypes = pendingRestoreData.soundCableTypes;
     }
     if (restoreDns) {
       dataToRestore.dnsRecords = pendingRestoreData.dnsRecords;
@@ -615,6 +624,18 @@ export const BackupView: React.FC<BackupViewProps> = ({
                     </span>
                     <p className="text-[11px] text-slate-500 dark:text-slate-400">
                       {pendingRestoreData.waterDevices?.length || 0} Pompa/Toren, {pendingRestoreData.waterPipes?.length || 0} Pipa, {pendingRestoreData.waterDeviceTypes?.length || 0} Tipe Alat, {pendingRestoreData.waterPipeTypes?.length || 0} Jenis Pipa
+                    </p>
+                  </div>
+                </label>
+
+                <label className="flex items-center gap-3 p-2 rounded-xl hover:bg-white dark:hover:bg-slate-800 transition-colors cursor-pointer group">
+                  <input type="checkbox" checked={restoreSound} onChange={() => setRestoreSound(!restoreSound)} className="w-4 h-4 rounded text-fuchsia-600 focus:ring-fuchsia-500 border-slate-300" />
+                  <div className="flex-1">
+                    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 group-hover:text-fuchsia-600 transition-colors">
+                      Jaringan SOUND & Master Kabel
+                    </span>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                      {pendingRestoreData.soundDevices?.length || 0} Speaker/Amp, {pendingRestoreData.soundCables?.length || 0} Kabel, {pendingRestoreData.soundDeviceTypes?.length || 0} Tipe Alat, {pendingRestoreData.soundCableTypes?.length || 0} Jenis Kabel
                     </p>
                   </div>
                 </label>
